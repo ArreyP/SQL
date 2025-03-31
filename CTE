@@ -1,0 +1,38 @@
+# SQL CTE abd Isolating 'int' from 'String'
+OrderDetails Table
+OrderDetailsID	OrderID	ProductID	Quantity
+103		10286	35		100
+.		.	.		.	
+.		.	.		.
+.		.	.		.
+
+Products Table
+ProductID	ProductName	SupplierID	CategoryID	Unit			Price
+1		Chais		1		1		10 boxes x 20 bags	18
+.		.		.		.		.			.	
+.		.		.		.		.			.
+.		.		.		.		.			.
+
+
+
+-- Find the number of items in each order (orderID)
+-- Order values in desc
+
+WITH odvl AS
+	(SELECT odl.OrderID, odl.Quantity, p.ProductID, p.ProductName, p.Price, (p.Price*odl.Quantity) AS OrderValue  
+		FROM w3c_data.orderdetails AS odl
+		JOIN w3c_data.products AS p on p.ProductID = odl.ProductID)
+
+	SELECT ODVL.OrderID, sum(ODVL.Quantity) AS NrOfItems, round(sum(ODVL.OrderValue), 2) AS OrderTotalValue 
+		FROM ODVL
+		GROUP BY ODVL.OrderID
+		ORDER BY OrderTotalValue DESC
+
+
+-- Number of boxes in each order
+SELECT odl.OrderID, p.ProductID, SUBSTRING(p.Unit, 1, 2) AS Boxes
+				FROM w3c_data.orderdetails AS odl
+				JOIN w3c_data.products AS p on p.ProductID = odl.ProductID
+
+WHERE Unit LIKE '%box%';
+
