@@ -1,4 +1,4 @@
-# SQL CTE abd Isolating 'int' from 'String'
+# SQL CTE and Isolating 'int' from 'String'
 OrderDetails Table
 OrderDetailsID	OrderID	ProductID	Quantity
 103		10286	35		100
