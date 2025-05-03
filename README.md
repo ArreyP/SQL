@@ -1,21 +1,27 @@
-/*Using the data in W3School SQL Tutorial, write SQL queries to answer the following.
-1.	Find the number of items in each order?
-2.	Determine the value of each Customer Order?
-3.	Find out the number of boxes in each Customer Order?
-*/
 /*
-Answer Sketch.
-The [OrderDetails Table] contains the ‘ProductIDs’ in the respective Orders. The [OrderDetails Table] does not have the prices. 
-The prices are in the [Products Table], as well as the Unit detail of the product. The ProductID is the primary key in the [Products Table], and the foreign key in the [OrderDetails Table]. 
+Personal Project towards formally becoming a data analyst:
+Initial project using W3S data. 
 
-I will try using JOIN, SUBQUERY and/or CTE to get an accurate answer.
+<b>Client Request: </b>
+'<i>The company is trying to be eco-friendly with its products (reduce rubber and use plant leaves to make boxes, instead of trees) and wants to improve its market presence in the respective continental markets. The product director is trying to plan new market campaigns, and they want to see how the products perform seasonally in the different locations. The marketing department aims to reward loyal customers. With 3 years of sales information, create a report to support the company and make a forecast for the next 5 years. </i>'
 
-Step 1
-Determine the quantity of each product in each order. A sum of these products with tell the number of items in each order. 
+Business Metric from analysis: 
+- Review of the company’s eco-friendly initiatives, 
+- seasonal product strategy, 
+- customer loyalty program, using three years of historical sales data 
+- a 5-year forecast.
+  
+From the analysis of the client's request and a deep study of the data, the following objectives will be used to draft a report:
+1.	Seasonal Product Performance by Continent                         <i>-- From the Customer information, we can get seasonal sales and sales by region.</i>
+2.	Customer Loyalty Analysis                                         <i>-- We can check customer performance to rate loyalty.</i>
+3.	Top Products by Units & Revenue (Seasonal)                        <i>-- the product information can tell about seasonal product revenue.</i>
+4.	5-Year Forecast of Sales by Continent & Season                    <i>-- using 3 years of data for predictive analysis to build a 5-year forecast.</i>
+5.	Environmental Insight (if plant-based packaging affects sales)    <i>-- Research on the company could be more eco-friendly.</i>
 
-Step 2
-By using an inner join to build a relationship between the [OrderDetails Table] and the [Products Table] using the ProductID, I can calculate the total price value of the product (Price* Quantity) in an order. 
 
-Step 3
-The Units give the details of all the products. The orders with boxes, could be determined using SUBSTRING
+Workflow:
+- Will extract the data with Microsoft Excel and do initial data cleansing.
+- Export the initially cleaned data into SQL for further cleaning and gathering insights
+- Then export the populated report into Microsoft Power BI for final reporting, data visualisation, and build a dashboard
+
 */
