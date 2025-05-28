@@ -1,4 +1,4 @@
-# SQL CTE and Isolating 'int' from 'String'
+# 
 OrderDetails Table
 OrderDetailsID	OrderID	ProductID	Quantity
 103		10286	35		100
@@ -18,21 +18,36 @@ ProductID	ProductName	SupplierID	CategoryID	Unit			Price
 -- Find the number of items in each order (orderID)
 -- Order values in desc
 
-WITH odvl AS
-	(SELECT odl.OrderID, odl.Quantity, p.ProductID, p.ProductName, p.Price, (p.Price*odl.Quantity) AS OrderValue  
-		FROM w3c_data.orderdetails AS odl
-		JOIN w3c_data.products AS p on p.ProductID = odl.ProductID)
-
-	SELECT ODVL.OrderID, sum(ODVL.Quantity) AS NrOfItems, round(sum(ODVL.OrderValue), 2) AS OrderTotalValue 
-		FROM ODVL
-		GROUP BY ODVL.OrderID
-		ORDER BY OrderTotalValue DESC
-
-
--- Number of boxes in each order
-SELECT odl.OrderID, p.ProductID, SUBSTRING(p.Unit, 1, 2) AS Boxes
-				FROM w3c_data.orderdetails AS odl
-				JOIN w3c_data.products AS p on p.ProductID = odl.ProductID
-
-WHERE Unit LIKE '%box%';
+-- Ideally, I would use a VIEW to join tables and prepare for KPIs analysis, unfortunately,  I am using a CTE instead, it works as well and I can using it multiple times
+WITH new_sql_table AS                                                                             	                                       	
+(SELECT p.ProductID, p.ProductName, p.SupplierID, sp.SupplierName,
+                         	p.CategoryID, ct.CategoryName, p.Unit, p.UnitCount,
+    	od.OrderID, od.Quantity, p.Price, ord.CustomerID, ord.EmployeeID,
+    	emp.LastName AS EmployeeName,                                            	                         	-- need emplpyee lastname for Employee Performance 
+    	ord.OrderDate,                                                                                       	                                       	-- Can use OrderDate to build a time hia 	
+    	ord.ShipperID, sh.ShipperName, cs.CustomerName,
+    	cs.Country, cs.continent,
+        od.Quantity*p.Price AS ProductValue,                                        	          	-- need produt values product performance and to calculate Revenue 	
+    	ord.Years,                                                                                                  	                                                      	-- need Years for Annual Performance records.        	
+          	CASE                                                                                                    	                                                                    	-- Using OrderDate to create season column        	
+  	WHEN ord.Months IN (12, 1, 2) THEN 'Winter'
+  	WHEN ord.Months IN (3, 4, 5) THEN 'Spring'
+  	WHEN ord.Months IN (6, 7, 8) THEN 'Summer'
+  	WHEN ord.Months IN (9, 10, 11) THEN 'Fall'
+	END AS Seasons,
+	CASE                                                                                                              	                                                                    	-- Using OrderDate to create Sales Quarter column         	
+  	WHEN ord.Months IN (4, 5, 6) THEN 'Q2'
+  	WHEN ord.Months IN (7, 8, 9) THEN 'Q3'
+  	WHEN ord.Months IN (10, 11, 12) THEN 'Q4'
+  	WHEN ord.Months IN (1, 2, 3) THEN 'Q1'
+	END AS Quarters
+FROM w3s_dataset.personalproject.products AS p
+LEFT JOIN w3s_dataset.personalproject.orderdetails od ON p.ProductID = od.ProductID
+LEFT JOIN w3s_dataset.personalproject.orders ord ON od.OrderID = ord.OrderID
+LEFT JOIN w3s_dataset.personalproject.customers cs ON ord.CustomerID = cs.CustomerID
+LEFT JOIN w3s_dataset.personalproject.suppliers sp ON p.SupplierID = sp.SupplierID
+LEFT JOIN w3s_dataset.personalproject.categories ct ON p.CategoryID = ct.CategoryID
+LEFT JOIN w3s_dataset.personalproject.shippers sh ON ord.ShipperID = sh.ShipperID
+LEFT JOIN w3s_dataset.personalproject.employees emp ON ord.EmployeeID = emp.EmployeeID
+)
 
