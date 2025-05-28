@@ -1,0 +1,108 @@
+N/B: Please read the analysis on the main project page. [ProjectPage](https://sites.google.com/view/arreypanquang/project-page?authuser=0)
+
+-- Ideally, I would use a VIEW to join tables and prepare for KPIs analysis, unfortunately,  I am using a CTE instead, it works as well and I can using it multiple times
+WITH new_sql_table AS                                                                             	                                       	
+(SELECT p.ProductID, p.ProductName, p.SupplierID, sp.SupplierName,
+                         	p.CategoryID, ct.CategoryName, p.Unit, p.UnitCount,
+    	od.OrderID, od.Quantity, p.Price, ord.CustomerID, ord.EmployeeID,
+    	emp.LastName AS EmployeeName,                                            	                         	-- need emplpyee lastname for Employee Performance 
+    	ord.OrderDate,                                                                                       	                                       	-- Can use OrderDate to build a time hia 	
+    	ord.ShipperID, sh.ShipperName, cs.CustomerName,
+    	cs.Country, cs.continent,
+        od.Quantity*p.Price AS ProductValue,                                        	          	-- need produt values product performance and to calculate Revenue 	
+    	ord.Years,                                                                                                  	                                                      	-- need Years for Annual Performance records.        	
+          	CASE                                                                                                    	                                                                    	-- Using OrderDate to create season column        	
+  	WHEN ord.Months IN (12, 1, 2) THEN 'Winter'
+  	WHEN ord.Months IN (3, 4, 5) THEN 'Spring'
+  	WHEN ord.Months IN (6, 7, 8) THEN 'Summer'
+  	WHEN ord.Months IN (9, 10, 11) THEN 'Fall'
+	END AS Seasons,
+	CASE                                                                                                              	                                                                    	-- Using OrderDate to create Sales Quarter column         	
+  	WHEN ord.Months IN (4, 5, 6) THEN 'Q2'
+  	WHEN ord.Months IN (7, 8, 9) THEN 'Q3'
+  	WHEN ord.Months IN (10, 11, 12) THEN 'Q4'
+  	WHEN ord.Months IN (1, 2, 3) THEN 'Q1'
+	END AS Quarters
+FROM w3s_dataset.personalproject.products AS p
+LEFT JOIN w3s_dataset.personalproject.orderdetails od ON p.ProductID = od.ProductID
+LEFT JOIN w3s_dataset.personalproject.orders ord ON od.OrderID = ord.OrderID
+LEFT JOIN w3s_dataset.personalproject.customers cs ON ord.CustomerID = cs.CustomerID
+LEFT JOIN w3s_dataset.personalproject.suppliers sp ON p.SupplierID = sp.SupplierID
+LEFT JOIN w3s_dataset.personalproject.categories ct ON p.CategoryID = ct.CategoryID
+LEFT JOIN w3s_dataset.personalproject.shippers sh ON ord.ShipperID = sh.ShipperID
+LEFT JOIN w3s_dataset.personalproject.employees emp ON ord.EmployeeID = emp.EmployeeID
+)
+ 
+-- Season Performance by continent.
+SELECT n.Continent, n.Seasons, SUM(n.Price*n.Quantity) AS TotalRevenue
+FROM new_sql_table AS n
+GROUP BY n.Continent, n.Seasons
+ORDER BY n.Continent , n.TotalRevenue DESC;
+/* Spring and Winter have the most sales orders.
+Whereas the Summer is relatively low.
+Europe generated the most revenue over three years
+*/
+-- Customer Performance
+SELECT n.CustomerName, n.CustomerID, SUM(ProductValue) AS OrderValue
+FROM new_sql_table
+GROUP BY  n.CustomerName, n.CustomerID
+ORDER BY  OrderValue DESC, n.CustomerName;
+/*
+The top three customers (Germany, USA,  and Austria) accounted for 25% plus of 3 years revenue
+Their highest spending was in the second year, forming a concave downwards slope,
+Which seems to be the general curve of the whole sales record over the 3 years.
+*/
+-- Product Performance
+SELECT n.ProductName, n.ProductID, SUM(ProductValue) AS TotalValue
+FROM new_sql_table
+GROUP BY n.ProductName, n.ProductID
+ORDER BY TotalValue DESC;
+/*
+The top three products account for close to 25% of total sales over three years
+The top two products have shown increased performance over the three years.
+Though the rate of increase is flattening in the third year.
+*/
+-- Regional Performance
+SELECT continent, SUM(ProductValue) AS SalesByRegion
+FROM new_sql_table
+GROUP BY continent
+ORDER BY SalesByRegion DESC
+ /* 
+As mentioned previously, Europe leads in sales, with Germany and Austria at the forefront over the three years. The spending also exhibits a concave downward slope, as noted earlier over the same period.
+*/
+ 
+ SELECT n.Continent, n.Seasons, -- n.CustomerName,
+SUM(n.Price*n.Quantity) AS TotalRevenue 
+FROM new_sql_table AS n
+GROUP BY n.Continent, n.Seasons -- n.CustomerName
+ORDER BY n.Continent;
+/* 
+As mentioned previously, Europe leads in sales, however, there is a massive change over the seasons for Europe and South America, whereas North America seems to remain level throughout the year. Seasonal sales analysis is a powerful tool for a comprehensive understanding of consumer behaviour, it can be used for sales, marketing, and staffing. Spring and Winter demonstrated the most active periods. 
+*/
+-- Employee Performance
+SELECT n.EmployeeName, n.Continent, n.Seasons, n.Years, SUM(n.Price*n.Quantity) AS TotalSalesPerformance
+FROM new_sql_table AS n
+GROUP BY n.EmployeeName, n.Continent, n.Seasons, n.Years
+ORDER BY TotalSalesPerformance DESC, n.Years
+/*
+The  top 3 salespeople accounted for close to 50% of the sales revenue, outperforming others in all the sales regions. A closer look at the bottom performer shows better performance in South America, outperforming all the bottom 4 salespeople in South America. A suggestion would be to get him focusing on South America and Europe, if/when the team needs him.
+*/
+
+-- Potential saving via shipping
+SELECT n.continent, n.SupplierName, n.CustomerName, SUM(ProductValue) AS CustomerRevenue
+FROM new_sql_table n
+WHERE n.continent = 'Europe'
+GROUP BY n.CustomerName, n.SupplierName, n.continent
+ORDER BY CustomerRevenue DESC
+/*
+Analysis shows Europe companies had their orders shipped by American companies, even if the Goods were manufactured in Europe. Overall, more than $200,000.00 order worth, were shipped by American shippers from and to Europe. Had the company established distribution in Europe, it would have saved a fraction of that money, as well as reduced risk and delivery time.
+*/
+
+-- Gift Box in Product
+SELECT n.CustomerName, n.OrderID, n.GiftBoxInProduct, n.Quantity, SUM(ProductValue) AS GiftBoxOrderValue, n.continent
+FROM new_sql_table n
+GROUP BY n.OrderID, n.CustomerName, n.GiftBoxInProduct, n.Quantity, n.continent
+ORDER BY GiftBoxOrderValue DESC
+/*
+Products with Gift boxes underperforming. It is understandable why the company wants to be eco-friendly. The material used in gift boxes and the quality of the boxes have left customers wondering. Research has shown that 94% of customers will buy products with the Recycle Logo on the boxes. I have a detailed report on how to enhance these gift boxes. Campaigns can be targeted toward eco-conscious regions and emerging markets. Research indicates a growing trend in demand for eco-friendly products, particularly packaging boxes, confirming positive market response and supporting the case for scaling sustainable packaging solutions, which would boost general sales and improve revenue
+*/
