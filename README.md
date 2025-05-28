@@ -12,12 +12,11 @@ Business Metric from analysis:
 - a 5-year forecast.
   
 From the analysis of the client's request and a deep study of the data, the following objectives will be used to draft a report:
-1.  Sales total according to continents (over 3 years)                <i>-- From the sale order information, I can summerise 3 years' sale by region.</i>        
-2.	Seasonal Product Performance by Continent                         <i>-- From the Customer information, I can get seasonal sales and sales by region.</i>
-3.	Customer Loyalty Analysis                                         <i>-- I can check customer performance to rate loyalty.</i>
-4.	Top Products by Units & Revenue (Seasonal)                        <i>-- the product information can tell about seasonal product revenue.</i>
-5.	5-Year Forecast of Sales by Continent & Season                    <i>-- using 3 years of data for predictive analysis to build a 5-year forecast.</i>
-6.	Environmental Insight (if plant-based packaging affects sales)    <i>-- Research on the company could be more eco-friendly.</i>
+1.  Sales total according to customers, products and continents (over 3 years)                <i>-- From the sale order information, I can summerise 3 years' sale by region.</i>        
+2.	Seasonal Product Performance by customers, products Continent and employees               <i>-- From the Customer information, I can get seasonal sales and sales by region.</i>
+3.	Customer Loyalty Analysis (For sales, marketing and recruitment)                          <i>-- I can check customer performance to rate loyalty.</i>
+4.	Top Products by Units & Revenue (Seasonal according to product packaging materual)        <i>-- the product information can tell about seasonal product revenue.</i>
+5.	Environmental Insight (if plant-based packaging affects sales and distribution location)  <i>-- Research on the company could be more eco-friendly.</i>
 
 
 Workflow:
